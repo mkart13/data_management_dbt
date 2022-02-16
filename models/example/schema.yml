@@ -19,3 +19,14 @@ models:
             tests:
                 - unique
                 - not_null
+
+
+    - name: stage_actor
+      description: "Unit tests for actor table"
+      columns:
+          - name: actor_id
+            description: "The primary key for this table"
+            tests:
+                - unique
+                - not_null
+            
