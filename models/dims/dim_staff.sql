@@ -1,32 +1,28 @@
+
+
 {{ config(materialized='table') }}
-/*
+
 select 
-    staff.staff_id as staff_key,
+    {{ dbt_utils.surrogate_key(['staff.staff_id']) }} as staff_key,
+    staff.staff_id as staff_id,
     staff.store_id as store_key,
-    CONCAT_WS(' ', staff.last_name,  staff.first_name) as full_name,
-    staff.username as staff_username,
-    addr.address as store_address
+    staff.last_name,
+    staff.first_name,
+    staff.email,
+    concat_ws(' ', staff.last_name, staff.first_name) as full_name,
+    staff.username as staff_user_name,
+    case staff.ACTIVE
+        when 'TRUE' then 'yes'
+        else 'no'
+    end as active_indicator,
+    addr.address as staff_address
+
 
 from 
-    {{ref('stage_staff')}} as staff
+    {{ ref('stg_staff') }} as staff
 
-left join
-    {{ref('stage_address')}} as addr
+left join 
+    {{ ref('stg_address') }} as addr
 
-on staff.address_id = addr.address_id
+on staff.address_id = addr.address_id 
 
-*/
-
-SELECT
-    {{ dbt_utils.surrogate_key(['s.staff_id']) }} AS staff_key,
-    s.staff_id,
-	s.first_name,
-	s.last_name,
-	CONCAT (FIRST_NAME,	',',LAST_NAME) AS firstlastname,
-	s.email,
-	CASE s.ACTIVE
-		WHEN 'TRUE'
-			THEN 'Yes'
-		ELSE 'No'
-		END AS active
-FROM {{ref('stage_staff')}} s

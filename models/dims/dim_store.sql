@@ -1,26 +1,14 @@
 {{ config(materialized='table') }}
 
-select 
-
-    store.store_id,
-
-    addr.district,
-    addr.address,
-    addr.phone,
-
-    staff.last_name
-
-from 
-    {{ ref('stage_store') }} as store
-
-left join 
-
-    {{ ref('stage_address') }} as addr
-
-on store.address_id = addr.address_id
-
-left join 
-
-    {{ ref('stage_staff') }} as staff 
-
-on store.manager_staff_id = staff.staff_id
+SELECT 
+{{ dbt_utils.surrogate_key(['s.store_id']) }} as STORE_LOCATION_KEY ,
+    s.store_id,
+	a.postal_code,
+	c.city,
+	a.district,
+	co.country,
+	a.phone
+FROM {{ source('mysql_rds_sakila','store') }} s
+JOIN {{ source('mysql_rds_sakila','address') }} a ON s.address_id = a.address_id
+JOIN {{ source('mysql_rds_sakila','city') }} c ON a.city_id = c.city_id
+JOIN {{ source('mysql_rds_sakila','country') }} co ON c.country_id = co.country_id
